@@ -18,7 +18,7 @@ export default function Footer() {
           >
             Psydevx
           </a>{" "}
-          <Image src="/mimikyu.webp" alt="Minikyu" width={16} height={16} className="inline-block" />
+          <Image src="/minikyu.webp" alt="Minikyu" width={16} height={16} className="inline-block" />
         </p>
         <p className="text-xs text-muted-foreground/50">
           All processing happens in your browser. No uploads. No tracking.
