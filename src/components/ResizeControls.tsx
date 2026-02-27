@@ -60,7 +60,7 @@ export default function ResizeControls({
             min={1}
             value={width || ""}
             onChange={(e) => handleWidth(e.target.value)}
-            placeholder={String(original.width)}
+            placeholder={original.width === 0 ? "auto" : String(original.width)}
             className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
@@ -95,7 +95,7 @@ export default function ResizeControls({
             min={1}
             value={height || ""}
             onChange={(e) => handleHeight(e.target.value)}
-            placeholder={String(original.height)}
+            placeholder={original.height === 0 ? "auto" : String(original.height)}
             disabled={lockAspect}
             className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
           />
@@ -116,11 +116,6 @@ export default function ResizeControls({
           </Button>
         ))}
       </div>
-
-      {/* Dimension summary */}
-      <p className="text-xs text-muted-foreground">
-        {original.width}×{original.height} → {width || original.width}×{height || original.height}
-      </p>
     </div>
   );
 }

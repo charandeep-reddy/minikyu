@@ -2,17 +2,11 @@
 
 import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 import UploadZone from "@/components/UploadZone";
-import QualitySlider from "@/components/QualitySlider";
-import FormatSelector from "@/components/FormatSelector";
-import ResizeControls from "@/components/ResizeControls";
-import BeforeAfterPreview from "@/components/BeforeAfterPreview";
-import FileInfoCard from "@/components/FileInfoCard";
 import BatchManager, { type BatchItem } from "@/components/BatchManager";
+import ControlPanel from "@/components/ControlPanel";
 
 import { compressImage } from "@/lib/compress";
 import { convertFormat, type OutputFormat, getExtension } from "@/lib/convert";
@@ -69,6 +63,7 @@ export default function HomePage() {
   // Single: Upload
   // ────────────────────────────────────────────────
   const handleSingleUpload = useCallback(async (files: File[]) => {
+    console.log(files.length)
     const file = files[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
@@ -129,10 +124,12 @@ export default function HomePage() {
       }));
 
       const savings = Math.round(
-        ((single.file.size - finalFile.size) / single.file.size) * 100
+        ((single.file.size - finalFile.size) / single.file.size) * 100,
       );
       if (savings > 0) {
-        toast.success(`Done! Saved ${savings}% (${formatFileSize(single.file.size - finalFile.size)})`);
+        toast.success(
+          `Done! Saved ${savings}% (${formatFileSize(single.file.size - finalFile.size)})`,
+        );
       } else {
         toast.success("Processing complete!");
       }
@@ -192,7 +189,9 @@ export default function HomePage() {
       if (item.status === "done") continue;
 
       setBatchItems((prev) =>
-        prev.map((it) => (it.id === item.id ? { ...it, status: "processing" as const } : it))
+        prev.map((it) =>
+          it.id === item.id ? { ...it, status: "processing" as const } : it,
+        ),
       );
 
       try {
@@ -225,21 +224,21 @@ export default function HomePage() {
           prev.map((it) =>
             it.id === item.id
               ? {
-                  ...it,
-                  status: "done" as const,
-                  processedBlob: finalFile,
-                  processedUrl: finalUrl,
-                  processedSize: finalFile.size,
-                  processedName: `${baseName}-minikyu${ext}`,
-                }
-              : it
-          )
+                ...it,
+                status: "done" as const,
+                processedBlob: finalFile,
+                processedUrl: finalUrl,
+                processedSize: finalFile.size,
+                processedName: `${baseName}-minikyu${ext}`,
+              }
+              : it,
+          ),
         );
       } catch {
         setBatchItems((prev) =>
           prev.map((it) =>
-            it.id === item.id ? { ...it, status: "error" as const } : it
-          )
+            it.id === item.id ? { ...it, status: "error" as const } : it,
+          ),
         );
       }
     }
@@ -259,7 +258,9 @@ export default function HomePage() {
 
   const handleBatchDownloadAll = useCallback(() => {
     const entries = batchItems
-      .filter((it) => it.status === "done" && it.processedBlob && it.processedName)
+      .filter(
+        (it) => it.status === "done" && it.processedBlob && it.processedName,
+      )
       .map((it) => ({ name: it.processedName!, blob: it.processedBlob! }));
     if (entries.length > 0) {
       downloadAsZip(entries);
@@ -287,31 +288,12 @@ export default function HomePage() {
       setWidth(Math.round(dims.width * (scale / 100)));
       setHeight(Math.round(dims.height * (scale / 100)));
     },
-    [single.originalDims]
+    [single.originalDims],
   );
 
   // ────────────────────────────────────────────────
   // Controls panel (shared between single & batch)
   // ────────────────────────────────────────────────
-  const controlsPanel = (
-    <div className="space-y-5">
-      <QualitySlider value={quality} onChange={setQuality} />
-      <Separator />
-      <FormatSelector value={format} onChange={setFormat} />
-      <Separator />
-      <ResizeControls
-        original={single.originalDims || (batchItems[0] ? { width: 0, height: 0 } : null)}
-        width={width}
-        height={height}
-        lockAspect={lockAspect}
-        onWidthChange={setWidth}
-        onHeightChange={setHeight}
-        onLockChange={setLockAspect}
-        onScaleChange={handleScale}
-      />
-      <Separator />
-    </div>
-  );
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -323,114 +305,20 @@ export default function HomePage() {
           <span className="text-primary">your images</span>
         </h1>
         <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
-          Fast, free, and 100% in-browser. No uploads, no tracking — just results.
+          Fast, free, and 100% in-browser. No uploads, no tracking — just
+          results.
         </p>
       </section>
 
-      {/* ── TABS ── */}
-      <Tabs defaultValue="single" className="space-y-6">
-        <TabsList className="grid w-full max-w-xs mx-auto grid-cols-2">
-          <TabsTrigger value="single">Single</TabsTrigger>
-          <TabsTrigger value="batch">Batch</TabsTrigger>
-        </TabsList>
-
-        {/* ═══════════ SINGLE MODE ═══════════ */}
-        <TabsContent value="single" className="space-y-6">
-          {!single.file ? (
-            <UploadZone onFiles={handleSingleUpload} />
-          ) : (
-            <>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left: Controls */}
-                <div className="lg:col-span-1 space-y-4">
-                  {controlsPanel}
-                  <Separator />
-                  <div className="flex gap-2">
-                    <Button
-                      className="flex-1"
-                      onClick={processSingle}
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? (
-                        <span className="flex items-center gap-2">
-                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Processing…
-                        </span>
-                      ) : (
-                        "Process Image"
-                      )}
-                    </Button>
-                    <Button variant="outline" onClick={resetSingle}>
-                      Reset
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Right: Preview */}
-                <div className="lg:col-span-2 space-y-4">
-                  {single.processedUrl && single.originalUrl ? (
-                    <BeforeAfterPreview
-                      originalUrl={single.originalUrl}
-                      processedUrl={single.processedUrl}
-                      originalLabel={`Original · ${formatFileSize(single.file!.size)}`}
-                      processedLabel={`Processed · ${single.processedSize ? formatFileSize(single.processedSize) : "—"}`}
-                    />
-                  ) : (
-                    <div className="aspect-video rounded-xl border border-border/50 bg-muted/20 flex items-center justify-center">
-                      <div className="text-center space-y-2">
-                        <Image src="/minikyu.webp" alt="Minikyu" width={64} height={64} className="opacity-40 mx-auto" />
-                        <p className="text-sm text-muted-foreground">
-                          Adjust settings & click <strong>Process Image</strong>
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <FileInfoCard
-                    original={
-                      single.file && single.originalDims
-                        ? {
-                            name: single.file.name,
-                            format: single.file.type.split("/")[1] || "unknown",
-                            width: single.originalDims.width,
-                            height: single.originalDims.height,
-                            size: single.file.size,
-                          }
-                        : null
-                    }
-                    output={
-                      single.processedSize != null && single.processedDims
-                        ? {
-                            format,
-                            width: single.processedDims.width,
-                            height: single.processedDims.height,
-                            size: single.processedSize,
-                          }
-                        : null
-                    }
-                  />
-
-                  {single.processedBlob && (
-                    <Button className="w-full" onClick={handleSingleDownload}>
-                      Download Processed Image
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </TabsContent>
-
         {/* ═══════════ BATCH MODE ═══════════ */}
-        <TabsContent value="batch" className="space-y-6">
+        <div className="space-y-6">
           <UploadZone multiple onFiles={handleBatchUpload} />
 
-          {batchItems.length > 0 && (
+          {batchItems.length > 0 && ( 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left: Controls */}
               <div className="lg:col-span-1 space-y-4">
-                {controlsPanel}
-                <Separator />
+                <ControlPanel quality={quality} setQuality={setQuality} format={format} setFormat={setFormat} original={batchItems.length > 1 ? { width: 0, height: 0 } : single.originalDims} width={width} height={height} lockAspect={lockAspect} setWidth={setWidth} setHeight={setHeight} setLockAspect={setLockAspect} handleScale={handleScale} />
                 <div className="flex gap-2">
                   <Button
                     className="flex-1"
@@ -463,8 +351,7 @@ export default function HomePage() {
               </div>
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>
     </div>
   );
 }
