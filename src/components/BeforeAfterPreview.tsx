@@ -66,18 +66,15 @@ export default function BeforeAfterPreview({
         />
 
         {/* Original (left - clipped) */}
-        <div
-          className="absolute inset-0 overflow-hidden"
-          style={{ width: `${position}%` }}
-        >
-          <img
-            src={originalUrl}
-            alt="Original"
-            className="absolute inset-0 w-full h-full object-contain"
-            style={{ width: containerRef.current?.offsetWidth || "100%" }}
-            draggable={false}
-          />
-        </div>
+        <img
+          src={originalUrl}
+          alt="Original"
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{
+            clipPath: `inset(0 ${100 - position}% 0 0)`
+          }}
+          draggable={false}
+        />
 
         {/* Slider line */}
         <div
@@ -86,7 +83,7 @@ export default function BeforeAfterPreview({
         >
           {/* Handle */}
           <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-lg border-2 border-primary flex items-center justify-center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round">
               <path d="M8 4l-6 8 6 8" />
               <path d="M16 4l6 8-6 8" />
             </svg>
