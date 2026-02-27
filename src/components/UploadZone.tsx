@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MAX_FILE_SIZE, ACCEPTED_TYPES, ACCEPTED_EXTENSIONS, formatFileSize } from "@/lib/utils";
 import Image from "next/image";
@@ -12,6 +12,7 @@ interface UploadZoneProps {
 
 export default function UploadZone({ multiple = false, onFiles }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const isOpen = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const validateAndEmit = useCallback(
@@ -47,6 +48,20 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
     [validateAndEmit]
   );
 
+  const handleClick = useCallback(() => {
+    if (isOpen.current) return // ← check first!
+    isOpen.current = true
+    inputRef.current?.click()
+  }, []);
+
+  useEffect(() => {
+    const handleFocus = (): void => {
+      isOpen.current = false;
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
+
   return (
     <div
       onDragOver={(e) => {
@@ -55,15 +70,19 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
       }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
-      onClick={() => inputRef.current?.click()}
+      onClick={handleClick}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        isOpen.current = false;
+        validateAndEmit(e.target.files);
+        e.target.value = "";
+      }}
       className={`
         relative flex flex-col items-center justify-center gap-4
         w-full min-h-[260px] rounded-2xl border-2 border-dashed
         cursor-pointer transition-all duration-300 select-none
-        ${
-          isDragging
-            ? "border-primary bg-primary/5 scale-[1.01]"
-            : "border-muted-foreground/25 bg-muted/30 hover:border-primary/50 hover:bg-primary/3 dark:border-muted-foreground/15 dark:bg-muted/10 dark:hover:border-primary/40"
+        ${isDragging
+          ? "border-primary bg-primary/5 scale-[1.01]"
+          : "border-muted-foreground/25 bg-muted/30 hover:border-primary/50 hover:bg-primary/3 dark:border-muted-foreground/15 dark:bg-muted/10 dark:hover:border-primary/40"
         }
       `}
     >
