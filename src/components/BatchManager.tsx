@@ -49,12 +49,12 @@ export default function BatchManager({
       {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {items.map((item) => (
-          <Card key={item.id} className="overflow-hidden p-0">
+          <Card key={item.id} className="overflow-hidden p-0 gap-0">
             <div className="aspect-square bg-muted/20 relative">
               <img
                 src={item.processedUrl || item.originalUrl}
                 alt={item.file.name}
-                className="w-full h-full object-cover"
+                className="w-full h-45 object-cover"
               />
               {item.status === "processing" && (
                 <div className="absolute inset-0 bg-background/60 flex items-center justify-center">

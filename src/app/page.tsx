@@ -19,6 +19,8 @@ import {
 import { downloadAsZip, downloadSingle } from "@/lib/zip";
 import { formatFileSize, stripExtension } from "@/lib/utils";
 import Image from "next/image";
+import BeforeAfterPreview from "@/components/BeforeAfterPreview";
+import FileInfoCard from "@/components/FileInfoCard";
 
 // ── Single-mode state ──────────────────────────────────
 interface SingleState {
@@ -60,12 +62,9 @@ export default function HomePage() {
   const nextId = useRef(0);
 
   // ────────────────────────────────────────────────
-  // Single: Upload
+  // Single: Upload (called internally when 1 file)
   // ────────────────────────────────────────────────
-  const handleSingleUpload = useCallback(async (files: File[]) => {
-    console.log(files.length)
-    const file = files[0];
-    if (!file) return;
+  const populateSingle = useCallback(async (file: File) => {
     const url = URL.createObjectURL(file);
     const dims = await getImageDimensions(file);
     setSingle({
@@ -151,31 +150,52 @@ export default function HomePage() {
   }, [single, format]);
 
   // ────────────────────────────────────────────────
-  // Single: Reset
+  // Single: Reset (also clears batchItems)
   // ────────────────────────────────────────────────
   const resetSingle = useCallback(() => {
     if (single.originalUrl) URL.revokeObjectURL(single.originalUrl);
     if (single.processedUrl) URL.revokeObjectURL(single.processedUrl);
+    batchItems.forEach((it) => {
+      URL.revokeObjectURL(it.originalUrl);
+      if (it.processedUrl) URL.revokeObjectURL(it.processedUrl);
+    });
     setSingle(initialSingle);
+    setBatchItems([]);
     setQuality(80);
     setFormat("jpeg");
     setWidth(0);
     setHeight(0);
     setLockAspect(true);
-  }, [single]);
+  }, [single, batchItems]);
 
   // ────────────────────────────────────────────────
-  // Batch: Upload
+  // Batch: Upload (populates single state when 1 file)
   // ────────────────────────────────────────────────
-  const handleBatchUpload = useCallback((files: File[]) => {
-    const newItems: BatchItem[] = files.map((f) => ({
-      id: String(nextId.current++),
-      file: f,
-      originalUrl: URL.createObjectURL(f),
-      status: "pending" as const,
-    }));
-    setBatchItems((prev) => [...prev, ...newItems]);
-  }, []);
+  const handleBatchUpload = useCallback(
+    async (files: File[]) => {
+      const newItems: BatchItem[] = files.map((f) => ({
+        id: String(nextId.current++),
+        file: f,
+        originalUrl: URL.createObjectURL(f),
+        status: "pending" as const,
+      }));
+
+      setBatchItems((prev) => {
+        const all = [...prev, ...newItems];
+        return all;
+      });
+
+      // If exactly 1 file total, also populate single state with real dims
+      const totalAfter = batchItems.length + files.length;
+      if (totalAfter === 1) {
+        await populateSingle(files[0]);
+      } else {
+        // Clear single state when switching to multi
+        setSingle(initialSingle);
+      }
+    },
+    [batchItems.length, populateSingle],
+  );
 
   // ────────────────────────────────────────────────
   // Batch: Process All
@@ -224,13 +244,13 @@ export default function HomePage() {
           prev.map((it) =>
             it.id === item.id
               ? {
-                ...it,
-                status: "done" as const,
-                processedBlob: finalFile,
-                processedUrl: finalUrl,
-                processedSize: finalFile.size,
-                processedName: `${baseName}-minikyu${ext}`,
-              }
+                  ...it,
+                  status: "done" as const,
+                  processedBlob: finalFile,
+                  processedUrl: finalUrl,
+                  processedSize: finalFile.size,
+                  processedName: `${baseName}-minikyu${ext}`,
+                }
               : it,
           ),
         );
@@ -310,48 +330,162 @@ export default function HomePage() {
         </p>
       </section>
 
-        {/* ═══════════ BATCH MODE ═══════════ */}
-        <div className="space-y-6">
-          <UploadZone multiple onFiles={handleBatchUpload} />
+      <div className="space-y-6">
+        <UploadZone multiple onFiles={handleBatchUpload} />
 
-          {batchItems.length > 0 && ( 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left: Controls */}
-              <div className="lg:col-span-1 space-y-4">
-                <ControlPanel quality={quality} setQuality={setQuality} format={format} setFormat={setFormat} original={batchItems.length > 1 ? { width: 0, height: 0 } : single.originalDims} width={width} height={height} lockAspect={lockAspect} setWidth={setWidth} setHeight={setHeight} setLockAspect={setLockAspect} handleScale={handleScale} />
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1"
-                    onClick={processBatch}
-                    disabled={isBatchProcessing}
-                  >
-                    {isBatchProcessing ? (
-                      <span className="flex items-center gap-2">
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Processing…
-                      </span>
-                    ) : (
-                      `Process ${batchItems.length} Images`
-                    )}
-                  </Button>
-                  <Button variant="outline" onClick={resetBatch}>
-                    Clear
-                  </Button>
-                </div>
-              </div>
-
-              {/* Right: Batch Grid */}
-              <div className="lg:col-span-2">
-                <BatchManager
-                  items={batchItems}
-                  onDownloadOne={handleBatchDownloadOne}
-                  onDownloadAll={handleBatchDownloadAll}
-                  isProcessing={isBatchProcessing}
-                />
+        {batchItems.length === 1 && single.originalDims && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left: Controls */}
+            <div className="lg:col-span-1 space-y-4">
+              <ControlPanel
+                quality={quality}
+                setQuality={setQuality}
+                format={format}
+                setFormat={setFormat}
+                original={single.originalDims}
+                width={width}
+                height={height}
+                lockAspect={lockAspect}
+                setWidth={setWidth}
+                setHeight={setHeight}
+                setLockAspect={setLockAspect}
+                handleScale={handleScale}
+              />
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1"
+                  onClick={processSingle}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Processing…
+                    </span>
+                  ) : (
+                    "Process Image"
+                  )}
+                </Button>
+                <Button variant="outline" onClick={resetSingle}>
+                  Reset
+                </Button>
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Right: Preview */}
+            <div className="lg:col-span-2 space-y-4">
+              {single.processedUrl && single.originalUrl ? (
+                <BeforeAfterPreview
+                  originalUrl={single.originalUrl}
+                  processedUrl={single.processedUrl}
+                  originalLabel={`Original · ${formatFileSize(single.file!.size)}`}
+                  processedLabel={`Processed · ${single.processedSize ? formatFileSize(single.processedSize) : "—"}`}
+                />
+              ) : (
+                <div className="aspect-video rounded-xl border border-border/50 bg-muted/20 flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <Image
+                      src="/minikyu.webp"
+                      alt="Minikyu"
+                      width={64}
+                      height={64}
+                      className="opacity-40 mx-auto"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Adjust settings & click <strong>Process Image</strong>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <FileInfoCard
+                original={
+                  single.file && single.originalDims
+                    ? {
+                        name: single.file.name,
+                        format: single.file.type.split("/")[1] || "unknown",
+                        width: single.originalDims.width,
+                        height: single.originalDims.height,
+                        size: single.file.size,
+                      }
+                    : null
+                }
+                output={
+                  single.processedSize != null && single.processedDims
+                    ? {
+                        format,
+                        width: single.processedDims.width,
+                        height: single.processedDims.height,
+                        size: single.processedSize,
+                      }
+                    : null
+                }
+              />
+
+              {single.processedBlob && (
+                <Button className="w-full" onClick={handleSingleDownload}>
+                  Download Processed Image
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {batchItems.length > 1 && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left: Controls */}
+            <div className="lg:col-span-1 space-y-4">
+              <ControlPanel
+                quality={quality}
+                setQuality={setQuality}
+                format={format}
+                setFormat={setFormat}
+                original={
+                  batchItems.length > 1
+                    ? { width: 0, height: 0 }
+                    : single.originalDims
+                }
+                width={width}
+                height={height}
+                lockAspect={lockAspect}
+                setWidth={setWidth}
+                setHeight={setHeight}
+                setLockAspect={setLockAspect}
+                handleScale={handleScale}
+              />
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1"
+                  onClick={processBatch}
+                  disabled={isBatchProcessing}
+                >
+                  {isBatchProcessing ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Processing…
+                    </span>
+                  ) : (
+                    `Process ${batchItems.length} Images`
+                  )}
+                </Button>
+                <Button variant="outline" onClick={resetBatch}>
+                  Clear
+                </Button>
+              </div>
+            </div>
+
+            {/* Right: Batch Grid */}
+            <div className="lg:col-span-2">
+              <BatchManager
+                items={batchItems}
+                onDownloadOne={handleBatchDownloadOne}
+                onDownloadAll={handleBatchDownloadAll}
+                isProcessing={isBatchProcessing}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
