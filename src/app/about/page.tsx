@@ -6,7 +6,7 @@ export default function AboutPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-16 space-y-10">
       <section className="text-center space-y-4">
-        <Image src="/minikyu.png" alt="Minikyu" width={64} height={64} className="mx-auto" />
+        <Image src="/mimikyu.webp" alt="Minikyu" width={64} height={64} className="mx-auto" />
         <h1 className="text-3xl font-bold tracking-tight">About Minikyu</h1>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
           A tiny ghost that shrinks your images — fast, free, and private.

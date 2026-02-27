@@ -378,7 +378,7 @@ export default function HomePage() {
                   ) : (
                     <div className="aspect-video rounded-xl border border-border/50 bg-muted/20 flex items-center justify-center">
                       <div className="text-center space-y-2">
-                        <Image src="/minikyu.png" alt="Minikyu" width={64} height={64} className="opacity-40 mx-auto" />
+                        <Image src="/mimikyu.webp" alt="Minikyu" width={64} height={64} className="opacity-40 mx-auto" />
                         <p className="text-sm text-muted-foreground">
                           Adjust settings & click <strong>Process Image</strong>
                         </p>

@@ -69,7 +69,7 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
     >
       {/* Ghost illustration */}
       <div className="text-6xl opacity-60 transition-transform duration-300 group-hover:scale-110">
-        <Image src="/minikyu.png" alt="Minikyu" width={64} height={64} />
+        <Image src="/mimikyu.webp" alt="Minikyu" width={64} height={64} />
       </div>
       <div className="text-center px-4">
         <p className="text-base font-medium text-foreground/80">
