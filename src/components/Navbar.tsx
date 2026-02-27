@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Navbar() {
   return (
@@ -12,13 +12,14 @@ export default function Navbar() {
             Mini<span className="text-primary">kyu</span>
           </span>
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2">
           <Link
             href="/about"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2"
           >
             About
           </Link>
+          <ThemeToggle />
         </nav>
       </div>
     </header>

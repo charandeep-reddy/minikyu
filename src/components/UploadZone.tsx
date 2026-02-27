@@ -63,7 +63,7 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
         ${
           isDragging
             ? "border-primary bg-primary/5 scale-[1.01]"
-            : "border-muted-foreground/25 bg-muted/30 hover:border-primary/50 hover:bg-primary/[0.03]"
+            : "border-muted-foreground/25 bg-muted/30 hover:border-primary/50 hover:bg-primary/3 dark:border-muted-foreground/15 dark:bg-muted/10 dark:hover:border-primary/40"
         }
       `}
     >
