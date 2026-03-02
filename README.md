@@ -94,7 +94,7 @@ If you're new to open source, this is a great project to start with. The codebas
 
 ## 📄 License
 
-MIT — do whatever you want with it.
+This project is licensed under the [MIT License](LICENSE) — see the [LICENSE](LICENSE) file for details.
 
 ---
 
