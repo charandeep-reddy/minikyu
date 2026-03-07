@@ -146,7 +146,7 @@ export default function HomePage() {
     if (!single.processedBlob || !single.file) return;
     const baseName = stripExtension(single.file.name);
     const ext = getExtension(format);
-    downloadSingle(single.processedBlob, `${baseName}-minikyu${ext}`);
+    downloadSingle(single.processedBlob, `${baseName}${ext}`);
   }, [single, format]);
 
   // ────────────────────────────────────────────────
@@ -249,7 +249,7 @@ export default function HomePage() {
                   processedBlob: finalFile,
                   processedUrl: finalUrl,
                   processedSize: finalFile.size,
-                  processedName: `${baseName}-minikyu${ext}`,
+                  processedName: `${baseName}${ext}`,
                 }
               : it,
           ),
