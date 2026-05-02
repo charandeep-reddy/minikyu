@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => { setMounted(true); }, []); // eslint-disable-line react-hooks/set-state-in-effect
 
   if (!mounted) {
     return (
@@ -32,17 +32,17 @@ export default function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9"
+          className="relative h-9 w-9 hover:bg-primary/10"
           onClick={() => setTheme(isDark ? "light" : "dark")}
         >
           <Sun
-            className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+            className={`h-[1.2rem] w-[1.2rem] transition-all duration-500 ${
               isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
             }`}
             style={{ position: isDark ? "absolute" : "relative" }}
           />
           <Moon
-            className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+            className={`h-[1.2rem] w-[1.2rem] transition-all duration-500 ${
               isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
             }`}
             style={{ position: isDark ? "relative" : "absolute" }}

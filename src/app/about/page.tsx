@@ -31,7 +31,7 @@ export default function AboutPage() {
           </p>
           <p>
             Minikyu has one obsession: making files smaller. Feed it a bloated
-            8MB photo and it'll shrink it, convert it, flip it, resize it — all
+            8MB photo and it&apos;ll shrink it, convert it, flip it, resize it — all
             while looking way too pleased with itself.
           </p>
         </div>
@@ -45,7 +45,7 @@ export default function AboutPage() {
           </p>
           <p>
             I built this because every other image tool wants your files on
-            their server. I didn't think that was necessary. Your photos are
+            their server. I didn&apos;t think that was necessary. Your photos are
             yours.
           </p>
         </div>

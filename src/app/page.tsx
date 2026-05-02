@@ -18,11 +18,10 @@ import {
 } from "@/lib/transform";
 import { downloadAsZip, downloadSingle } from "@/lib/zip";
 import { formatFileSize, stripExtension } from "@/lib/utils";
-import Image from "next/image";
 import BeforeAfterPreview from "@/components/BeforeAfterPreview";
 import FileInfoCard from "@/components/FileInfoCard";
+import { Sparkles, Shield, Zap, ImageIcon, ArrowDown, Settings, X } from "lucide-react";
 
-// ── Single-mode state ──────────────────────────────────
 interface SingleState {
   file: File | null;
   originalUrl: string | null;
@@ -44,26 +43,22 @@ const initialSingle: SingleState = {
 };
 
 export default function HomePage() {
-  // ── SHARED SETTINGS ──
   const [quality, setQuality] = useState(80);
   const [format, setFormat] = useState<OutputFormat>("jpeg");
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
   const [lockAspect, setLockAspect] = useState(true);
 
-  // ── SINGLE MODE ──
   const [single, setSingle] = useState<SingleState>(initialSingle);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // ── BATCH MODE ──
   const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
 
+  const [showSettings, setShowSettings] = useState(false);
+
   const nextId = useRef(0);
 
-  // ────────────────────────────────────────────────
-  // Single: Upload (called internally when 1 file)
-  // ────────────────────────────────────────────────
   const populateSingle = useCallback(async (file: File) => {
     const url = URL.createObjectURL(file);
     const dims = await getImageDimensions(file);
@@ -80,20 +75,15 @@ export default function HomePage() {
     setHeight(dims.height);
   }, []);
 
-  // ────────────────────────────────────────────────
-  // Single: Process
-  // ────────────────────────────────────────────────
   const processSingle = useCallback(async () => {
     if (!single.file || !single.originalDims) return;
     setIsProcessing(true);
     try {
       let workingFile: File = single.file;
 
-      // 1. compress
       const compressed = await compressImage(workingFile, quality);
       workingFile = compressed.file;
 
-      // 2. resize + transform
       const newDims = calculateDimensions(single.originalDims, {
         width: width || undefined,
         height: height || undefined,
@@ -107,11 +97,9 @@ export default function HomePage() {
         type: workingFile.type,
       });
 
-      // 3. convert format
       const finalFile = await convertFormat(transformedFile, format, quality);
       const finalUrl = URL.createObjectURL(finalFile);
 
-      // Clean up old URL
       if (single.processedUrl) URL.revokeObjectURL(single.processedUrl);
 
       setSingle((prev) => ({
@@ -139,9 +127,6 @@ export default function HomePage() {
     }
   }, [single, quality, format, width, height, lockAspect]);
 
-  // ────────────────────────────────────────────────
-  // Single: Download
-  // ────────────────────────────────────────────────
   const handleSingleDownload = useCallback(() => {
     if (!single.processedBlob || !single.file) return;
     const baseName = stripExtension(single.file.name);
@@ -149,9 +134,6 @@ export default function HomePage() {
     downloadSingle(single.processedBlob, `${baseName}${ext}`);
   }, [single, format]);
 
-  // ────────────────────────────────────────────────
-  // Single: Reset (also clears batchItems)
-  // ────────────────────────────────────────────────
   const resetSingle = useCallback(() => {
     if (single.originalUrl) URL.revokeObjectURL(single.originalUrl);
     if (single.processedUrl) URL.revokeObjectURL(single.processedUrl);
@@ -168,9 +150,6 @@ export default function HomePage() {
     setLockAspect(true);
   }, [single, batchItems]);
 
-  // ────────────────────────────────────────────────
-  // Batch: Upload (populates single state when 1 file)
-  // ────────────────────────────────────────────────
   const handleBatchUpload = useCallback(
     async (files: File[]) => {
       const newItems: BatchItem[] = files.map((f) => ({
@@ -185,21 +164,16 @@ export default function HomePage() {
         return all;
       });
 
-      // If exactly 1 file total, also populate single state with real dims
       const totalAfter = batchItems.length + files.length;
       if (totalAfter === 1) {
         await populateSingle(files[0]);
       } else {
-        // Clear single state when switching to multi
         setSingle(initialSingle);
       }
     },
     [batchItems.length, populateSingle],
   );
 
-  // ────────────────────────────────────────────────
-  // Batch: Process All
-  // ────────────────────────────────────────────────
   const processBatch = useCallback(async () => {
     setIsBatchProcessing(true);
     const items = [...batchItems];
@@ -267,9 +241,6 @@ export default function HomePage() {
     toast.success("Batch processing complete!");
   }, [batchItems, quality, format, width, height, lockAspect]);
 
-  // ────────────────────────────────────────────────
-  // Batch: Downloads
-  // ────────────────────────────────────────────────
   const handleBatchDownloadOne = useCallback((item: BatchItem) => {
     if (item.processedBlob && item.processedName) {
       downloadSingle(item.processedBlob, item.processedName);
@@ -287,9 +258,6 @@ export default function HomePage() {
     }
   }, [batchItems]);
 
-  // ────────────────────────────────────────────────
-  // Batch: Reset
-  // ────────────────────────────────────────────────
   const resetBatch = useCallback(() => {
     batchItems.forEach((it) => {
       URL.revokeObjectURL(it.originalUrl);
@@ -298,9 +266,6 @@ export default function HomePage() {
     setBatchItems([]);
   }, [batchItems]);
 
-  // ────────────────────────────────────────────────
-  // Resize helpers
-  // ────────────────────────────────────────────────
   const handleScale = useCallback(
     (scale: number) => {
       const dims = single.originalDims;
@@ -311,23 +276,41 @@ export default function HomePage() {
     [single.originalDims],
   );
 
-  // ────────────────────────────────────────────────
-  // Controls panel (shared between single & batch)
-  // ────────────────────────────────────────────────
+  const features = [
+    { icon: Zap, label: "Compress" },
+    { icon: ImageIcon, label: "Convert" },
+    { icon: ArrowDown, label: "Resize" },
+    { icon: Shield, label: "100% Private" },
+  ];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-      {/* ── HERO ── */}
-      <section className="text-center space-y-3 pt-4 pb-2">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+      <section className="text-center space-y-5 pt-6 pb-4">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
           Compress, convert & transform
           <br />
-          <span className="text-primary">your images</span>
+          <span className="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">
+            your images
+          </span>
         </h1>
-        <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
+        <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base px-2">
           Fast, free, and 100% in-browser. No uploads, no tracking — just
           results.
         </p>
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          {features.map((f) => {
+            const Icon = f.icon;
+            return (
+              <span
+                key={f.label}
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-primary/5 text-primary border border-primary/10"
+              >
+                <Icon className="w-3 h-3" />
+                {f.label}
+              </span>
+            );
+          })}
+        </div>
       </section>
 
       <div className="space-y-6">
@@ -335,25 +318,65 @@ export default function HomePage() {
 
         {batchItems.length === 1 && single.originalDims && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Controls */}
-            <div className="lg:col-span-1 space-y-4">
-              <ControlPanel
-                quality={quality}
-                setQuality={setQuality}
-                format={format}
-                setFormat={setFormat}
-                original={single.originalDims}
-                width={width}
-                height={height}
-                lockAspect={lockAspect}
-                setWidth={setWidth}
-                setHeight={setHeight}
-                setLockAspect={setLockAspect}
-                handleScale={handleScale}
-              />
-              <div className="flex gap-2">
+            <div className="lg:col-span-1">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="flex lg:hidden items-center justify-center gap-2 w-full h-9 text-sm font-medium rounded-lg border border-border/40 bg-card/50 hover:bg-muted/50 transition-colors mb-4"
+              >
+                {showSettings ? (
+                  <>
+                    <X className="w-4 h-4" /> Hide Settings
+                  </>
+                ) : (
+                  <>
+                    <Settings className="w-4 h-4" /> Show Settings
+                  </>
+                )}
+              </button>
+              <div className={`space-y-4 ${showSettings ? "block" : "hidden lg:block"}`}>
+                <ControlPanel
+                  quality={quality}
+                  setQuality={setQuality}
+                  format={format}
+                  setFormat={setFormat}
+                  original={single.originalDims}
+                  width={width}
+                  height={height}
+                  lockAspect={lockAspect}
+                  setWidth={setWidth}
+                  setHeight={setHeight}
+                  setLockAspect={setLockAspect}
+                  handleScale={handleScale}
+                />
+                <div className="hidden lg:flex gap-2">
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                    onClick={processSingle}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Processing…
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        Process Image
+                      </span>
+                    )}
+                  </Button>
+                  <Button variant="outline" onClick={resetSingle}>
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex lg:hidden gap-2">
                 <Button
-                  className="flex-1"
+                  className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
                   onClick={processSingle}
                   disabled={isProcessing}
                 >
@@ -363,17 +386,16 @@ export default function HomePage() {
                       Processing…
                     </span>
                   ) : (
-                    "Process Image"
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Process Image
+                    </span>
                   )}
                 </Button>
                 <Button variant="outline" onClick={resetSingle}>
                   Reset
                 </Button>
               </div>
-            </div>
-
-            {/* Right: Preview */}
-            <div className="lg:col-span-2 space-y-4">
               {single.processedUrl && single.originalUrl ? (
                 <BeforeAfterPreview
                   originalUrl={single.originalUrl}
@@ -382,15 +404,11 @@ export default function HomePage() {
                   processedLabel={`Processed · ${single.processedSize ? formatFileSize(single.processedSize) : "—"}`}
                 />
               ) : (
-                <div className="aspect-video rounded-xl border border-border/50 bg-muted/20 flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <Image
-                      src="/minikyu.webp"
-                      alt="Minikyu"
-                      width={64}
-                      height={64}
-                      className="opacity-40 mx-auto"
-                    />
+                <div className="aspect-video max-sm:aspect-square rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                  <div className="text-center space-y-3 px-4">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary/5 mx-auto flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-primary/40" />
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       Adjust settings & click <strong>Process Image</strong>
                     </p>
@@ -423,7 +441,11 @@ export default function HomePage() {
               />
 
               {single.processedBlob && (
-                <Button className="w-full" onClick={handleSingleDownload}>
+                <Button
+                  className="w-full gap-2 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                  onClick={handleSingleDownload}
+                >
+                  <ArrowDown className="w-4 h-4" />
                   Download Processed Image
                 </Button>
               )}
@@ -433,29 +455,69 @@ export default function HomePage() {
 
         {batchItems.length > 1 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Controls */}
-            <div className="lg:col-span-1 space-y-4">
-              <ControlPanel
-                quality={quality}
-                setQuality={setQuality}
-                format={format}
-                setFormat={setFormat}
-                original={
-                  batchItems.length > 1
-                    ? { width: 0, height: 0 }
-                    : single.originalDims
-                }
-                width={width}
-                height={height}
-                lockAspect={lockAspect}
-                setWidth={setWidth}
-                setHeight={setHeight}
-                setLockAspect={setLockAspect}
-                handleScale={handleScale}
-              />
-              <div className="flex gap-2">
+            <div className="lg:col-span-1">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="flex lg:hidden items-center justify-center gap-2 w-full h-9 text-sm font-medium rounded-lg border border-border/40 bg-card/50 hover:bg-muted/50 transition-colors mb-4"
+              >
+                {showSettings ? (
+                  <>
+                    <X className="w-4 h-4" /> Hide Settings
+                  </>
+                ) : (
+                  <>
+                    <Settings className="w-4 h-4" /> Show Settings
+                  </>
+                )}
+              </button>
+              <div className={`space-y-4 ${showSettings ? "block" : "hidden lg:block"}`}>
+                <ControlPanel
+                  quality={quality}
+                  setQuality={setQuality}
+                  format={format}
+                  setFormat={setFormat}
+                  original={
+                    batchItems.length > 1
+                      ? { width: 0, height: 0 }
+                      : single.originalDims
+                  }
+                  width={width}
+                  height={height}
+                  lockAspect={lockAspect}
+                  setWidth={setWidth}
+                  setHeight={setHeight}
+                  setLockAspect={setLockAspect}
+                  handleScale={handleScale}
+                />
+                <div className="hidden lg:flex gap-2">
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                    onClick={processBatch}
+                    disabled={isBatchProcessing}
+                  >
+                    {isBatchProcessing ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Processing…
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        Process {batchItems.length} Images
+                      </span>
+                    )}
+                  </Button>
+                  <Button variant="outline" onClick={resetBatch}>
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex lg:hidden gap-2">
                 <Button
-                  className="flex-1"
+                  className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
                   onClick={processBatch}
                   disabled={isBatchProcessing}
                 >
@@ -465,17 +527,16 @@ export default function HomePage() {
                       Processing…
                     </span>
                   ) : (
-                    `Process ${batchItems.length} Images`
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Process {batchItems.length} Images
+                    </span>
                   )}
                 </Button>
                 <Button variant="outline" onClick={resetBatch}>
                   Clear
                 </Button>
               </div>
-            </div>
-
-            {/* Right: Batch Grid */}
-            <div className="lg:col-span-2">
               <BatchManager
                 items={batchItems}
                 onDownloadOne={handleBatchDownloadOne}

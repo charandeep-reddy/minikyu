@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MAX_FILE_SIZE, ACCEPTED_TYPES, ACCEPTED_EXTENSIONS, formatFileSize } from "@/lib/utils";
-import Image from "next/image";
+import { Upload, FileCheck } from "lucide-react";
 
 interface UploadZoneProps {
   multiple?: boolean;
@@ -12,6 +12,7 @@ interface UploadZoneProps {
 
 export default function UploadZone({ multiple = false, onFiles }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [hasFiles, setHasFiles] = useState(false);
   const isOpen = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +34,7 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
       }
 
       if (valid.length > 0) {
+        setHasFiles(true);
         onFiles(multiple ? valid : [valid[0]]);
       }
     },
@@ -49,9 +51,9 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
   );
 
   const handleClick = useCallback(() => {
-    if (isOpen.current) return // ← check first!
-    isOpen.current = true
-    inputRef.current?.click()
+    if (isOpen.current) return;
+    isOpen.current = true;
+    inputRef.current?.click();
   }, []);
 
   useEffect(() => {
@@ -77,30 +79,50 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
         e.target.value = "";
       }}
       className={`
-        relative flex flex-col items-center justify-center gap-4
-        w-full min-h-[260px] rounded-2xl border-2 border-dashed
+        relative flex flex-col items-center justify-center gap-3
+        w-full min-h-[200px] rounded-2xl border-2 border-dashed
         cursor-pointer transition-all duration-300 select-none
+        bg-background/50 backdrop-blur-sm
         ${isDragging
-          ? "border-primary bg-primary/5 scale-[1.01]"
-          : "border-muted-foreground/25 bg-muted/30 hover:border-primary/50 hover:bg-primary/3 dark:border-muted-foreground/15 dark:bg-muted/10 dark:hover:border-primary/40"
+          ? "border-primary scale-[1.01] bg-primary/5 shadow-lg shadow-primary/10"
+          : hasFiles
+            ? "border-green-400/50 bg-green-500/5"
+            : "border-muted-foreground/20 hover:border-primary/40 hover:bg-primary/2 dark:border-muted-foreground/15 dark:hover:border-primary/30"
         }
       `}
     >
-      {/* Ghost illustration */}
-      <div className="text-6xl opacity-60 transition-transform duration-300 group-hover:scale-110">
-        <Image src="/minikyu.webp" alt="Minikyu" width={64} height={64} />
-      </div>
-      <div className="text-center px-4">
-        <p className="text-base font-medium text-foreground/80">
-          {isDragging ? "Drop your images here…" : "Drag & drop images here"}
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          or <span className="text-primary font-medium underline underline-offset-2">click to browse</span>
-        </p>
-        <p className="text-xs text-muted-foreground/60 mt-3">
-          JPEG, PNG, WebP, AVIF · Max 20 MB {multiple && "· Multiple files supported"}
-        </p>
-      </div>
+      {hasFiles ? (
+        <div className="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+          <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <FileCheck className="w-6 h-6 text-green-600 dark:text-green-400" />
+          </div>
+          <p className="text-sm font-medium text-foreground/80">
+            Files added &mdash; drop more or click to replace
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className={`transition-all duration-500 ${isDragging ? "scale-110 -translate-y-1" : ""}`}>
+            <div className={`w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center transition-all duration-300 ${isDragging ? "bg-primary/20 shadow-lg shadow-primary/20" : ""}`}>
+              <Upload className={`w-6 h-6 transition-colors duration-300 ${isDragging ? "text-primary" : "text-muted-foreground/60"}`} />
+            </div>
+          </div>
+          <div className="text-center px-4">
+            <p className="text-sm font-medium text-foreground/70">
+              {isDragging ? "Drop your images here\u2026" : "Drag & drop images here"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              or{" "}
+              <span className="text-primary font-medium underline underline-offset-2">
+                click to browse
+              </span>
+            </p>
+            <p className="text-[11px] text-muted-foreground/50 mt-2.5">
+              JPEG, PNG, WebP, AVIF &middot; Max 20 MB {multiple && "· Multiple files supported"}
+            </p>
+          </div>
+        </>
+      )}
 
       <input
         ref={inputRef}
