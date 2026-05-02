@@ -322,7 +322,7 @@ export default function HomePage() {
             <div className="lg:col-span-1">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="flex lg:hidden items-center justify-center gap-2 w-full h-9 text-sm font-medium rounded-lg border border-border/40 bg-card/50 hover:bg-muted/50 transition-colors mb-4"
+                className="flex md:hidden items-center justify-center gap-2 w-full h-9 text-sm font-medium rounded-lg border border-border/40 bg-card/50 hover:bg-muted/50 transition-colors mb-4"
               >
                 {showSettings ? (
                   <>
@@ -334,7 +334,7 @@ export default function HomePage() {
                   </>
                 )}
               </button>
-              <div className={`space-y-4 overflow-hidden transition-all duration-300 ${showSettings ? "animate-in slide-in-from-top-2 fade-in duration-300" : "hidden lg:block"}`}>
+              <div className={`space-y-4 overflow-hidden transition-all duration-300 ${showSettings ? "animate-in slide-in-from-top-2 fade-in duration-300" : "hidden md:block"}`}>
                 <ControlPanel
                   quality={quality}
                   setQuality={setQuality}
@@ -349,7 +349,7 @@ export default function HomePage() {
                   setLockAspect={setLockAspect}
                   handleScale={handleScale}
                 />
-                <div className="hidden lg:flex gap-2">
+                <div className="hidden md:flex gap-2">
                   <Button
                     className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                     onClick={processSingle}
@@ -375,7 +375,7 @@ export default function HomePage() {
             </div>
 
             <div className="lg:col-span-2 space-y-4">
-              <div className="flex lg:hidden gap-2">
+              <div className="flex md:hidden gap-2">
                 <Button
                   className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                   onClick={processSingle}
@@ -461,7 +461,7 @@ export default function HomePage() {
             <div className="lg:col-span-1">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="flex lg:hidden items-center justify-center gap-2 w-full h-9 text-sm font-medium rounded-lg border border-border/40 bg-card/50 hover:bg-muted/50 transition-colors mb-4"
+                className="flex md:hidden items-center justify-center gap-2 w-full h-9 text-sm font-medium rounded-lg border border-border/40 bg-card/50 hover:bg-muted/50 transition-colors mb-4"
               >
                 {showSettings ? (
                   <>
@@ -473,7 +473,7 @@ export default function HomePage() {
                   </>
                 )}
               </button>
-              <div className={`space-y-4 overflow-hidden transition-all duration-300 ${showSettings ? "animate-in slide-in-from-top-2 fade-in duration-300" : "hidden lg:block"}`}>
+              <div className={`space-y-4 overflow-hidden transition-all duration-300 ${showSettings ? "animate-in slide-in-from-top-2 fade-in duration-300" : "hidden md:block"}`}>
                 <ControlPanel
                   quality={quality}
                   setQuality={setQuality}
@@ -492,7 +492,7 @@ export default function HomePage() {
                   setLockAspect={setLockAspect}
                   handleScale={handleScale}
                 />
-                <div className="hidden lg:flex gap-2">
+                <div className="hidden md:flex gap-2">
                   <Button
                     className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                     onClick={processBatch}
@@ -518,7 +518,7 @@ export default function HomePage() {
             </div>
 
             <div className="lg:col-span-2 space-y-4">
-              <div className="flex lg:hidden gap-2">
+              <div className="flex md:hidden gap-2">
                 <Button
                   className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                   onClick={processBatch}
