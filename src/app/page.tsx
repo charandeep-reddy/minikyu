@@ -285,7 +285,7 @@ export default function HomePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <section className="text-center space-y-5 pt-6 pb-4">
+      <section className="text-center space-y-5 pt-6 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
           Compress, convert & transform
           <br />
@@ -293,17 +293,18 @@ export default function HomePage() {
             your images
           </span>
         </h1>
-        <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base px-2">
+        <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base px-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 fill-mode-both">
           Fast, free, and 100% in-browser. No uploads, no tracking — just
           results.
         </p>
         <div className="flex items-center justify-center gap-2 flex-wrap">
-          {features.map((f) => {
+          {features.map((f, i) => {
             const Icon = f.icon;
             return (
               <span
                 key={f.label}
-                className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-primary/5 text-primary border border-primary/10"
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-primary/5 text-primary border border-primary/10 animate-in fade-in zoom-in duration-300 fill-mode-both"
+                style={{ animationDelay: `${300 + i * 100}ms` }}
               >
                 <Icon className="w-3 h-3" />
                 {f.label}
@@ -333,7 +334,7 @@ export default function HomePage() {
                   </>
                 )}
               </button>
-              <div className={`space-y-4 ${showSettings ? "block" : "hidden lg:block"}`}>
+              <div className={`space-y-4 overflow-hidden transition-all duration-300 ${showSettings ? "animate-in slide-in-from-top-2 fade-in duration-300" : "hidden lg:block"}`}>
                 <ControlPanel
                   quality={quality}
                   setQuality={setQuality}
@@ -350,7 +351,7 @@ export default function HomePage() {
                 />
                 <div className="hidden lg:flex gap-2">
                   <Button
-                    className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                    className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                     onClick={processSingle}
                     disabled={isProcessing}
                   >
@@ -366,7 +367,7 @@ export default function HomePage() {
                       </span>
                     )}
                   </Button>
-                  <Button variant="outline" onClick={resetSingle}>
+                  <Button variant="outline" onClick={resetSingle} className="active:scale-[0.98] transition-all duration-150">
                     Reset
                   </Button>
                 </div>
@@ -376,7 +377,7 @@ export default function HomePage() {
             <div className="lg:col-span-2 space-y-4">
               <div className="flex lg:hidden gap-2">
                 <Button
-                  className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                  className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                   onClick={processSingle}
                   disabled={isProcessing}
                 >
@@ -392,17 +393,19 @@ export default function HomePage() {
                     </span>
                   )}
                 </Button>
-                <Button variant="outline" onClick={resetSingle}>
+                <Button variant="outline" onClick={resetSingle} className="active:scale-[0.98] transition-all duration-150">
                   Reset
                 </Button>
               </div>
               {single.processedUrl && single.originalUrl ? (
-                <BeforeAfterPreview
-                  originalUrl={single.originalUrl}
-                  processedUrl={single.processedUrl}
-                  originalLabel={`Original · ${formatFileSize(single.file!.size)}`}
-                  processedLabel={`Processed · ${single.processedSize ? formatFileSize(single.processedSize) : "—"}`}
-                />
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <BeforeAfterPreview
+                    originalUrl={single.originalUrl}
+                    processedUrl={single.processedUrl}
+                    originalLabel={`Original · ${formatFileSize(single.file!.size)}`}
+                    processedLabel={`Processed · ${single.processedSize ? formatFileSize(single.processedSize) : "—"}`}
+                  />
+                </div>
               ) : (
                 <div className="aspect-video max-sm:aspect-square rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm flex items-center justify-center shadow-sm">
                   <div className="text-center space-y-3 px-4">
@@ -442,7 +445,7 @@ export default function HomePage() {
 
               {single.processedBlob && (
                 <Button
-                  className="w-full gap-2 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                  className="w-full gap-2 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150 animate-in fade-in slide-in-from-bottom-2 duration-500"
                   onClick={handleSingleDownload}
                 >
                   <ArrowDown className="w-4 h-4" />
@@ -470,7 +473,7 @@ export default function HomePage() {
                   </>
                 )}
               </button>
-              <div className={`space-y-4 ${showSettings ? "block" : "hidden lg:block"}`}>
+              <div className={`space-y-4 overflow-hidden transition-all duration-300 ${showSettings ? "animate-in slide-in-from-top-2 fade-in duration-300" : "hidden lg:block"}`}>
                 <ControlPanel
                   quality={quality}
                   setQuality={setQuality}
@@ -491,7 +494,7 @@ export default function HomePage() {
                 />
                 <div className="hidden lg:flex gap-2">
                   <Button
-                    className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                    className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                     onClick={processBatch}
                     disabled={isBatchProcessing}
                   >
@@ -507,7 +510,7 @@ export default function HomePage() {
                       </span>
                     )}
                   </Button>
-                  <Button variant="outline" onClick={resetBatch}>
+                  <Button variant="outline" onClick={resetBatch} className="active:scale-[0.98] transition-all duration-150">
                     Clear
                   </Button>
                 </div>
@@ -517,7 +520,7 @@ export default function HomePage() {
             <div className="lg:col-span-2 space-y-4">
               <div className="flex lg:hidden gap-2">
                 <Button
-                  className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20"
+                  className="flex-1 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 shadow-md shadow-primary/20 active:scale-[0.98] transition-all duration-150"
                   onClick={processBatch}
                   disabled={isBatchProcessing}
                 >
@@ -533,7 +536,7 @@ export default function HomePage() {
                     </span>
                   )}
                 </Button>
-                <Button variant="outline" onClick={resetBatch}>
+                <Button variant="outline" onClick={resetBatch} className="active:scale-[0.98] transition-all duration-150">
                   Clear
                 </Button>
               </div>

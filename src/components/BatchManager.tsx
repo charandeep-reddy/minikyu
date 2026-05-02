@@ -49,10 +49,11 @@ export default function BatchManager({
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {items.map((item) => (
+        {items.map((item, i) => (
           <Card
             key={item.id}
-            className="overflow-hidden p-0 gap-0 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group"
+            className="overflow-hidden p-0 gap-0 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group animate-in fade-in slide-in-from-bottom-2 fill-mode-both"
+            style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="h-44 bg-muted/10 relative overflow-hidden">
               <img
@@ -108,7 +109,7 @@ export default function BatchManager({
       </div>
 
       {doneCount > 0 && (
-        <Button onClick={onDownloadAll} className="w-full gap-2 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 text-primary-foreground shadow-md">
+        <Button onClick={onDownloadAll} className="w-full gap-2 bg-gradient-to-r from-primary to-indigo-500 hover:from-primary/90 hover:to-indigo-500/90 text-primary-foreground shadow-md active:scale-[0.98] transition-all duration-150">
           <Archive className="w-4 h-4" />
           Download All as ZIP ({doneCount} images)
         </Button>

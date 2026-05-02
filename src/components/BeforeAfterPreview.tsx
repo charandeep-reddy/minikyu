@@ -61,7 +61,7 @@ export default function BeforeAfterPreview({
       </div>
       <div
         ref={containerRef}
-        className="relative w-full aspect-video max-sm:aspect-square rounded-xl overflow-hidden border border-border/50 bg-muted/10 shadow-sm cursor-col-resize select-none touch-none"
+        className="relative w-full aspect-video max-sm:aspect-square rounded-xl overflow-hidden border border-border/50 bg-muted/10 shadow-sm cursor-col-resize select-none touch-none animate-in fade-in duration-300"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -75,13 +75,13 @@ export default function BeforeAfterPreview({
         <img
           src={originalUrl}
           alt="Original"
-          className="absolute inset-0 w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-contain transition-[clip-path] duration-75"
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
           draggable={false}
         />
 
         <div
-          className="absolute top-0 bottom-0 w-0.5 z-10 pointer-events-none"
+          className="absolute top-0 bottom-0 w-0.5 z-10 pointer-events-none transition-[left] duration-75"
           style={{
             left: `${position}%`,
             background: `linear-gradient(to bottom, transparent, hsl(280, 60%, 60%), transparent)`,

@@ -26,9 +26,9 @@ export default function QualitySlider({ value, onChange }: QualitySliderProps) {
           <label className="text-sm font-medium text-foreground/80">Quality</label>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-mono font-semibold tabular-nums">{value}</span>
+          <span className="text-sm font-mono font-semibold tabular-nums transition-colors duration-300">{value}</span>
           <span
-            className="text-[10px] font-medium px-1.5 py-0.5 rounded-md border"
+            className="text-[10px] font-medium px-1.5 py-0.5 rounded-md border transition-all duration-300"
             style={{
               color: `hsl(${hue}, 50%, 35%)`,
               backgroundColor: `hsl(${hue}, 60%, 90%)`,

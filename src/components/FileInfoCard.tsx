@@ -27,7 +27,7 @@ export default function FileInfoCard({ original, output }: FileInfoCardProps) {
     : 0;
 
   return (
-    <div className="rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-4 py-3 shadow-sm">
+    <div className={`rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-4 py-3 shadow-sm ${output ? "animate-in fade-in slide-in-from-bottom-2 duration-500" : ""}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] gap-2 sm:gap-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <FileDown className="w-3.5 h-3.5 text-muted-foreground shrink-0 hidden sm:block" />
