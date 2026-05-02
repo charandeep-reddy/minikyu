@@ -75,13 +75,13 @@ export default function BeforeAfterPreview({
         <img
           src={originalUrl}
           alt="Original"
-          className="absolute inset-0 w-full h-full object-contain transition-[clip-path] duration-75"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
           draggable={false}
         />
 
         <div
-          className="absolute top-0 bottom-0 w-0.5 z-10 pointer-events-none transition-[left] duration-75"
+          className="absolute top-0 bottom-0 w-0.5 z-10 pointer-events-none"
           style={{
             left: `${position}%`,
             background: `linear-gradient(to bottom, transparent, hsl(280, 60%, 60%), transparent)`,
