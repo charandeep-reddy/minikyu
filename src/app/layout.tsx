@@ -40,7 +40,7 @@ export default function RootLayout({
             <Toaster richColors position="bottom-right" />
           </TooltipProvider>
         </ThemeProvider>
-        <Analytics />
+        <Analytics mode="production" />
       </body>
     </html>
   );
