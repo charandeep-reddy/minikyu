@@ -46,8 +46,21 @@ export default function Navbar() {
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             }`}
           >
-            Home
+            Image
             {pathname === "/" && (
+              <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+            )}
+          </Link>
+          <Link
+            href="/pdf"
+            className={`relative text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-md transition-colors ${
+              pathname === "/pdf"
+                ? "text-foreground bg-primary/10"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            PDF
+            {pathname === "/pdf" && (
               <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
             )}
           </Link>

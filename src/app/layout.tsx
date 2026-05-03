@@ -14,9 +14,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Minikyu — Image Compression & Conversion",
+  title: "Minikyu — Image & PDF Compression",
   description:
-    "Compress, convert, resize your images — fast, free, and 100% in your browser. No uploads, no tracking. By Psydevx.",
+    "Compress, convert, resize your images and PDFs — fast, free, and 100% in your browser. No uploads, no tracking. By Psydevx.",
 };
 
 export default function RootLayout({
