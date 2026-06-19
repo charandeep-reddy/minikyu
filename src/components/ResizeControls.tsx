@@ -56,7 +56,7 @@ export default function ResizeControls({
         <label className="text-sm font-medium text-foreground/80">Resize</label>
         {original && (
           <span className="text-[10px] text-muted-foreground/50 ml-auto font-mono">
-            {original.width}×{original.height}
+            {(width || original.width)}×{(height || original.height)}
           </span>
         )}
       </div>

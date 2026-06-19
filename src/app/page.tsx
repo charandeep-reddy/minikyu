@@ -56,6 +56,7 @@ export default function HomePage() {
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
 
   const [showSettings, setShowSettings] = useState(false);
+  const [uploadKey, setUploadKey] = useState(0);
 
   const nextId = useRef(0);
 
@@ -148,6 +149,7 @@ export default function HomePage() {
     setWidth(0);
     setHeight(0);
     setLockAspect(true);
+    setUploadKey((k) => k + 1);
   }, [single, batchItems]);
 
   const handleBatchUpload = useCallback(
@@ -315,7 +317,7 @@ export default function HomePage() {
       </section>
 
       <div className="space-y-6">
-        <UploadZone multiple onFiles={handleBatchUpload} />
+        <UploadZone key={uploadKey} multiple onFiles={handleBatchUpload} />
 
         {batchItems.length === 1 && single.originalDims && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

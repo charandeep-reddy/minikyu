@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { MAX_FILE_SIZE, ACCEPTED_TYPES, ACCEPTED_EXTENSIONS, formatFileSize } from "@/lib/utils";
+import { MAX_FILE_SIZE, ACCEPTED_TYPES, ACCEPTED_EXTENSIONS, formatFileSize, getFileExtension } from "@/lib/utils";
 import { Upload, FileCheck } from "lucide-react";
 
 interface UploadZoneProps {
@@ -22,7 +22,11 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
       const valid: File[] = [];
 
       for (const file of Array.from(fileList)) {
-        if (!ACCEPTED_TYPES.includes(file.type)) {
+        const ext = getFileExtension(file.name);
+        const acceptedExts = ACCEPTED_EXTENSIONS.split(",").map((e) => e.replace(".", ""));
+        const isTypeValid = ACCEPTED_TYPES.includes(file.type);
+        const isExtValid = ext ? acceptedExts.includes(ext) : false;
+        if (!isTypeValid && !isExtValid) {
           toast.error(`"${file.name}" is not a supported format. Use JPEG, PNG, WebP, or AVIF.`);
           continue;
         }
@@ -73,10 +77,8 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
       onClick={handleClick}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        isOpen.current = false;
-        validateAndEmit(e.target.files);
-        e.target.value = "";
+      onChange={() => {
+        // handled by input's own onChange below
       }}
       className={`
         relative flex flex-col items-center justify-center gap-3
@@ -131,6 +133,7 @@ export default function UploadZone({ multiple = false, onFiles }: UploadZoneProp
         multiple={multiple}
         className="hidden"
         onChange={(e) => {
+          isOpen.current = false;
           validateAndEmit(e.target.files);
           e.target.value = "";
         }}
